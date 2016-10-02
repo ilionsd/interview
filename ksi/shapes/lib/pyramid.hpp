@@ -10,8 +10,8 @@
 #include <stdexcept>
 #include <sstream>
 
-#include "shape.h"
-#include "cloning.h"
+#include "shape.hpp"
+#include "../include/cloning.hpp"
 
 namespace shapes {
 

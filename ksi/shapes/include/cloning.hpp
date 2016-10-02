@@ -18,6 +18,7 @@ namespace cloning {
         public virtual cloneable<TBase>
     {
 		using derived_t = TDer;
+                using base_t = typename cloneable<TBase>::base_t;
 
 		virtual std::unique_ptr<base_t>
 		clone() override {

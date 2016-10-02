@@ -4,11 +4,11 @@
 #include <memory>
 #include <vector>
 
-#include "shape.h"
-#include "cube.h"
-#include "cuboid.h"
-#include "cylinder.h"
-#include "pyramid.h"
+#include "../lib/shape.hpp"
+#include "../lib/cube.hpp"
+#include "../lib/cuboid.hpp"
+#include "../lib/cylinder.hpp"
+#include "../lib/pyramid.hpp"
 
 namespace shapes {
 

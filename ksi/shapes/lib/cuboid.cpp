@@ -1,4 +1,4 @@
-#include "cuboid.h"
+#include "cuboid.hpp"
 
 namespace shapes {
 

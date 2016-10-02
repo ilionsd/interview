@@ -10,7 +10,7 @@
 #include <stdexcept>
 
 
-#include "shapes.h"
+#include "../include/shapes.hpp"
 
 using std::cin;
 using std::cout;
