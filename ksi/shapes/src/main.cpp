@@ -153,10 +153,11 @@ void create_item() {
 	cin >> index;
 	cout << endl;
 	if (index < 0 || index > createF.size())
-		help_shapes();
+                help_shapes();
 	else if (index == 0)
 		cout << "Quit" << endl;
 	else {
+            
 		cout << argsOrder[index - 1] << endl;
 		std::vector<double> args;
 		do {
@@ -175,6 +176,5 @@ void create_item() {
 		catch (std::exception e) {
 			cout << "Unexpected error: " << e.what() << endl;
 		}
-		
 	}
 }

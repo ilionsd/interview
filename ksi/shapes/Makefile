@@ -4,6 +4,7 @@ LDFLAGS = -g -lstdc++
 
 OBJS = bin/main.o bin/cylinder.o bin/cuboid.o bin/cube.o bin/pyramid.o
 
+all : bin/shapes
 
 bin/shapes : $(OBJS)
 	g++ $(LDFLAGS) -o bin/shapes $(OBJS)
@@ -23,8 +24,6 @@ bin/cube.o : lib/cube.cpp lib/cube.hpp lib/shape.hpp include/cloning.hpp
 bin/pyramid.o : lib/pyramid.cpp lib/pyramid.hpp lib/shape.hpp include/cloning.hpp
 	g++ -c $(CXXFLAGS) -o bin/pyramid.o lib/pyramid.cpp
 	
-
-
 clean:
-	rm -f $(OBJS) bin/shapes
+	rm -f -R $(OBJS) ./bin
 
