@@ -1,6 +1,0 @@
-called: g++
-	/home/ilion/projects/interview/ksi/shapes
-	g++
-	-c
-	src/main.cpp
-

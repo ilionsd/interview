@@ -1,2 +1,11 @@
 itmo/hirlam_sample_input/**
 itmo/hirlam_sample_input.zip
+
+ksi/shapes/bin
+
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/

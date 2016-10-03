@@ -19,20 +19,22 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\cloning.h" />
-    <ClInclude Include="..\..\..\src\cube.h" />
-    <ClInclude Include="..\..\..\src\cuboid.h" />
-    <ClInclude Include="..\..\..\src\cylinder.h" />
-    <ClInclude Include="..\..\..\src\pyramid.h" />
-    <ClInclude Include="..\..\..\src\shape.h" />
-    <ClInclude Include="..\..\..\src\shapes.h" />
+    <ClCompile Include="..\..\..\lib\cube.cpp" />
+    <ClCompile Include="..\..\..\lib\cuboid.cpp" />
+    <ClCompile Include="..\..\..\lib\cylinder.cpp" />
+    <ClCompile Include="..\..\..\lib\pyramid.cpp" />
+    <ClCompile Include="..\..\..\src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\cube.cpp" />
-    <ClCompile Include="..\..\..\src\cuboid.cpp" />
-    <ClCompile Include="..\..\..\src\cylinder.cpp" />
-    <ClCompile Include="..\..\..\src\main.cpp" />
-    <ClCompile Include="..\..\..\src\pyramid.cpp" />
+    <ClInclude Include="..\..\..\include\cloning.hpp" />
+    <ClInclude Include="..\..\..\include\shapes.hpp" />
+    <ClInclude Include="..\..\..\lib\cube.hpp" />
+    <ClInclude Include="..\..\..\lib\cuboid.hpp" />
+    <ClInclude Include="..\..\..\lib\cylinder.hpp" />
+    <ClInclude Include="..\..\..\lib\metafactory.hpp" />
+    <ClInclude Include="..\..\..\lib\pyramid.hpp" />
+    <ClInclude Include="..\..\..\lib\shape.hpp" />
+    <ClInclude Include="..\..\..\test\test.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{62896E60-356A-42E8-9832-0F05B85A5D74}</ProjectGuid>
