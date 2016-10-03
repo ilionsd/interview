@@ -10,8 +10,8 @@
 #include <stdexcept>
 #include <sstream>
 
-#include "shape.hpp"
 #include "../include/cloning.hpp"
+#include "shape.hpp"
 
 namespace shapes {
 
@@ -22,7 +22,7 @@ namespace shapes {
 	make_pyramid_grad(const std::vector<double> &sides, const std::vector<double> &anglesGrad, double height, double tolerance = 1e-6);
 
     std::unique_ptr<shape>
-    make_pyramid(const std::vector<double> &args);
+		make_pyramid(const std::vector<double> &args);
 
     class polygon
     {
@@ -80,8 +80,6 @@ namespace shapes {
             polygon mPolygon;
             double mHeight;
     };
-
-
 
 };  //-- namespace shapes --
 

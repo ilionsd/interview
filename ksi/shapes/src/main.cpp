@@ -12,6 +12,8 @@
 
 #include "../include/shapes.hpp"
 
+#include "../test/test.hpp"
+
 using std::cin;
 using std::cout;
 using std::endl;
@@ -58,18 +60,8 @@ std::vector<std::string> helpMain = {
 
 int main() {
     cout << "Hello world!" << endl;
-
-	shapes::make_shape_f make_pyramid_f = &shapes::make_pyramid;
-	
-
-    auto pyramid = shapes::make_pyramid({2, sqrt(5), 1}, {M_PI / 2.0, asin(1.0 / sqrt(5)), asin(2.0 / sqrt(5))}, 3);
-    cout << pyramid->to_string() << endl;
-
-
+	test_all();
 	main_menu();
-
-
-
     return 0;
 }
 

@@ -7,8 +7,8 @@
 #include <memory>
 #include <sstream>
 
-#include "shape.hpp"
 #include "../include/cloning.hpp"
+#include "shape.hpp"
 
 namespace shapes {
 
