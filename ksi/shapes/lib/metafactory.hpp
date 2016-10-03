@@ -21,10 +21,15 @@ namespace shapes {
 		static const make_shape_f factory;
 	};
 
+        template<>
 	const make_shape_f make_shape<cylinder>::factory = &make_cylinder;
+        template<>
 	const make_shape_f make_shape<cube>::factory = &make_cube;
+        template<>
 	const make_shape_f make_shape<cuboid>::factory = &make_cuboid;
+        template<>
 	const make_shape_f make_shape<pyramid>::factory = &make_pyramid;
+        
 };	//-- namespace shapes --
 
 #endif	//-- _SHAPES_METAFACTORY_HPP_ --

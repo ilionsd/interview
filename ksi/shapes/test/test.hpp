@@ -4,8 +4,9 @@
 
 template<typename T>
 struct test_shape {
+    using shape_type = T;
 	static int cloning(std::initializer_list<double> args) {
-		auto shape = shapes::make_shape<typename T>::factory(args);
+		auto shape = shapes::make_shape<shape_type>::factory(args);
 		auto shapeClone = shape->clone();
 		return 0;
 	};
