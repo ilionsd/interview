@@ -16,7 +16,6 @@
 
 using std::size_t;
 using std::ptrdiff_t;
-using std::get;
 
 template<typename T, size_t Rows, size_t Cols>
 void fill_ranked(T (&mat)[Rows][Cols]) {
@@ -60,10 +59,28 @@ operator+= (std::pair<ptrdiff_t, ptrdiff_t> &x, const std::pair<ptrdiff_t, ptrdi
 	return x;
 }
 
+template<typename T>
+inline
+std::pair<ptrdiff_t, ptrdiff_t>
+operator* (std::pair<ptrdiff_t, ptrdiff_t> x, const T k) {
+	return std::make_pair(x.first * k, x.second * k);
+}
+
+template<typename T>
+inline
+std::pair<ptrdiff_t, ptrdiff_t>&
+operator*= (std::pair<ptrdiff_t, ptrdiff_t> x, const T k) {
+	x.first *= k;
+	x.second *= k;
+	return x;
+}
+
+
+
 template<typename PFOnElement>
 void SnailOrder(size_t nSideSize, bool bFromCenter, const PFOnElement &pfOnElement) {
 
-	std::array<std::pair<ptrdiff_t, ptrdiff_t>, 4> cwShifts	{{ {0, 1}, {1, 0}, {0, -1}, {-1, 0} }};
+	std::array<std::pair<ptrdiff_t, ptrdiff_t>, 4> cwShifts		{{ {0, 1}, {1, 0}, {0, -1}, {-1, 0} }};
 	std::array<std::pair<ptrdiff_t, ptrdiff_t>, 4> ccwShifts	{{ {1, 0}, {0, 1}, {-1, 0}, {0, -1} }};
 
 	const std::array<std::pair<ptrdiff_t, ptrdiff_t>, 4> &shifts = cwShifts;
@@ -116,8 +133,16 @@ void SnailOrder(size_t nSideSize, bool bFromCenter, const PFOnElement &pfOnEleme
 
 }
 
-auto problem_1a() -> void {
-
+std::pair<ptrdiff_t, ptrdiff_t> CalcPos(const size_t order) {
+	size_t k = 0, circuitSize;
+	std::pair<ptrdiff_t, ptrdiff_t> pos;
+	if (!order)
+		pos = {0, 0};
+	do {
+		circuitSize = k * 2 * 4;
+	}
+	while (order > circuitSize);
+	return {};
 }
 
 template<typename T, size_t N, size_t M>
@@ -128,8 +153,8 @@ void desc_element(T (&mat)[N][M], const size_t row, const size_t col, const size
 
 
 auto main() -> int {
-	const size_t n = 5, m = 5;
-	unsigned mat[n][m] = { 0 };
+	const size_t n = 5;
+	unsigned mat[n][n] = { 0 };
 	fill_ranked(mat);
 	print(mat);
 
