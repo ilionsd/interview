@@ -41,6 +41,12 @@ std::string to_string(const std::pair<T1, T2> &p) {
 	return ss.str();
 }
 
+template<typename T1, typename T2>
+std::ostream& operator<< (std::ostream& stream, const std::pair<T1, T2> &p) {
+	stream << to_string(p);
+	return stream;
+}
+
 
 
 //typedef void (*PFOnElement)( int x, int y, int order);
@@ -62,29 +68,29 @@ operator+= (std::pair<ptrdiff_t, ptrdiff_t> &x, const std::pair<ptrdiff_t, ptrdi
 template<typename T>
 inline
 std::pair<ptrdiff_t, ptrdiff_t>
-operator* (std::pair<ptrdiff_t, ptrdiff_t> x, const T k) {
+operator* (const std::pair<ptrdiff_t, ptrdiff_t> &x, const T k) {
 	return std::make_pair(x.first * k, x.second * k);
 }
 
 template<typename T>
 inline
 std::pair<ptrdiff_t, ptrdiff_t>&
-operator*= (std::pair<ptrdiff_t, ptrdiff_t> x, const T k) {
+operator*= (std::pair<ptrdiff_t, ptrdiff_t> &x, const T k) {
 	x.first *= k;
 	x.second *= k;
 	return x;
 }
 
-
+struct shift {
+	using type = std::array<std::pair<ptrdiff_t, ptrdiff_t>, 4>;
+	static constexpr type cw	{{ {0, 1}, {1, 0}, {0, -1}, {-1, 0} }};
+	static constexpr type ccw	{{ {1, 0}, {0, 1}, {-1, 0}, {0, -1} }};
+};
+constexpr shift::type shift::cw;
+constexpr shift::type shift::ccw;
 
 template<typename PFOnElement>
-void SnailOrder(size_t nSideSize, bool bFromCenter, const PFOnElement &pfOnElement) {
-
-	std::array<std::pair<ptrdiff_t, ptrdiff_t>, 4> cwShifts		{{ {0, 1}, {1, 0}, {0, -1}, {-1, 0} }};
-	std::array<std::pair<ptrdiff_t, ptrdiff_t>, 4> ccwShifts	{{ {1, 0}, {0, 1}, {-1, 0}, {0, -1} }};
-
-	const std::array<std::pair<ptrdiff_t, ptrdiff_t>, 4> &shifts = cwShifts;
-
+void SnailOrder(size_t nSideSize, bool bFromCenter, const shift::type& shifts, const PFOnElement &pfOnElement) {
 	ptrdiff_t k;
 	ptrdiff_t loopDirection;
 	std::pair<ptrdiff_t, ptrdiff_t> currentIndex, nextIndex;
@@ -92,12 +98,10 @@ void SnailOrder(size_t nSideSize, bool bFromCenter, const PFOnElement &pfOnEleme
 	if (bFromCenter) {
 		k = nSideSize / 2 - 1;
 		loopDirection = -1;
-		nextIndex = {nSideSize / 2 - 1, nSideSize / 2};
 	}
 	else {
 		k = 0;
 		loopDirection = 1;
-		nextIndex = {0, 0};
 	}
 
 	size_t order = 0;
@@ -126,6 +130,7 @@ void SnailOrder(size_t nSideSize, bool bFromCenter, const PFOnElement &pfOnEleme
 		}
 		k += loopDirection;
 	}
+
 	if (nSideSize % 2 && !bFromCenter) {
 		size_t temp = nSideSize / 2;
 		pfOnElement(temp, temp, order++);
@@ -133,16 +138,19 @@ void SnailOrder(size_t nSideSize, bool bFromCenter, const PFOnElement &pfOnEleme
 
 }
 
-std::pair<ptrdiff_t, ptrdiff_t> CalcPos(const size_t order) {
-	size_t k = 0, circuitSize;
-	std::pair<ptrdiff_t, ptrdiff_t> pos;
-	if (!order)
-		pos = {0, 0};
-	do {
-		circuitSize = k * 2 * 4;
+std::pair<ptrdiff_t, ptrdiff_t> CalcPos(size_t order, const shift::type& shifts) {
+	size_t k = 0, step = 1;
+	std::pair<ptrdiff_t, ptrdiff_t> pos {0, 0};
+	if (order) {
+		//order--;
+		while (order > step) {
+			order -= step;
+			pos += shifts[k++ % shifts.size()] * step;
+			step += k % 2 == 0;
+		}
+		pos += shifts[k++ % 4] * order;
 	}
-	while (order > circuitSize);
-	return {};
+	return pos;
 }
 
 template<typename T, size_t N, size_t M>
@@ -153,16 +161,21 @@ void desc_element(T (&mat)[N][M], const size_t row, const size_t col, const size
 
 
 auto main() -> int {
-	const size_t n = 5;
+	const size_t n = 4;
 	unsigned mat[n][n] = { 0 };
 	fill_ranked(mat);
 	print(mat);
 
 	auto doSmthg = [&mat](size_t i, size_t j, size_t k)-> void {desc_element(mat, i, j, k);};
-	SnailOrder(n, false, doSmthg);
+	SnailOrder(n, true, shift::ccw, doSmthg);
 	std::cout << std::endl;
-	SnailOrder(n, true, doSmthg);
+	SnailOrder(n, true, shift::cw, doSmthg);
 	std::cout << std::endl;
+	const size_t orderMax = n * n - 1;
+	CalcPos(3, shift::cw);
+	for (size_t order = 0; order <= orderMax; ++order ) {
+		std::cout << CalcPos(order, shift::cw) << " ";
+	}
 
 	return 0;
 }
