@@ -15,34 +15,16 @@
 #include <string>
 #include <sstream>
 
+
+#include "utility.hpp"
+
+
 using std::size_t;
 using std::ptrdiff_t;
 
 using std::cout;
 using std::endl;
 
-template<typename T, size_t Rows, size_t Cols>
-void fill_ranked(T (&mat)[Rows][Cols]) {
-	size_t inc = 0;
-	for (size_t row = 0; row < Rows; ++row)
-		for (size_t col = 0; col < Cols; ++col)
-			mat[row][col] = inc++;
-}
-template<typename T>
-void fill_ranked(std::unique_ptr<T[]>& arr, const size_t size) {
-	for (size_t k = 0; k < size; ++k) {
-		arr[k] = k;
-	}
-}
-
-template<typename T, size_t Rows, size_t Cols>
-void print(T (&mat)[Rows][Cols]) {
-	for (size_t row = 0; row < Rows; ++row) {
-		for (size_t col = 0; col < Cols; ++col)
-			cout << mat[row][col] << "	";
-		cout << endl;
-	}
-}
 
 template<typename T1, typename T2>
 std::string to_string(const std::pair<T1, T2> &p) {
@@ -61,7 +43,7 @@ std::ostream& operator<< (std::ostream& stream, const std::pair<T1, T2> &p) {
 inline
 std::pair<ptrdiff_t, ptrdiff_t>
 operator+ (const std::pair<ptrdiff_t, ptrdiff_t> &x, const std::pair<ptrdiff_t, ptrdiff_t> &y) {
-	return std::make_pair(x.first + y.first, x.second + y.second);
+	return {x.first + y.first, x.second + y.second};
 }
 
 template<typename T1, typename T2>
@@ -77,17 +59,32 @@ template<typename T1, typename T2, typename T3>
 inline
 std::pair<T1, T2>
 operator* (const std::pair<T1, T2> &x, const T3 k) {
-	return std::make_pair<T1, T2>(x.first * k, x.second * k);
+	return {x.first * k, x.second * k};
 }
 
 template<typename T1, typename T2, typename T3>
 inline
 std::pair<T1, T2>&
-operator*= (std::pair<T1, T2> &x, const T3 k) {
-	x.first *= k;
-	x.second *= k;
-	return x;
+operator*= (std::pair<T1, T2> &p, const T3 k) {
+	p.first *= k;
+	p.second *= k;
+	return p;
 }
+
+template<typename T1, typename T2, typename T3>
+inline std::pair<T1, T2>
+operator% (const std::pair<T1, T2>& p, const T3 modulo) {
+	return {p.first % modulo, p.second % modulo};
+}
+
+template<typename T1, typename T2, typename T3>
+inline std::pair<T1, T2>&
+operator%= (std::pair<T1, T2>& p, const T3 modulo) {
+	p.first %= modulo;
+	p.second %= modulo;
+	return p;
+}
+
 
 struct shift {
 	using type = std::array<std::pair<ptrdiff_t, ptrdiff_t>, 4>;
@@ -160,6 +157,8 @@ std::pair<ptrdiff_t, ptrdiff_t> CalcPos(size_t order, const shift::type& shifts)
 	return pos;
 }
 
+
+
 enum class corner : char {
 	left = 0,
 	right = 1,
@@ -178,6 +177,15 @@ inline bool compare(const std::pair<T1, T2>& p1, const std::pair<T1, T2>& p2) {
 	return C<T1>{}(p1.first, p2.first) && C<T2>{}(p1.second, p2.second);
 }
 
+template<typename T1, typename T2>
+inline std::pair<T2, T1>
+swap(const std::pair<T1, T2>& p) {
+	return {p.second, p.first};
+}
+
+
+
+
 template<typename T>
 void FillZigzag(T* _pnMatrixForFill, size_t _nSideSize, const T* _pnSrcElements, corner _nCorner ) {
 	std::pair<ptrdiff_t, ptrdiff_t> shift, index, direction;
@@ -185,7 +193,7 @@ void FillZigzag(T* _pnMatrixForFill, size_t _nSideSize, const T* _pnSrcElements,
 	direction.first = (isRight) ? -1 : 1;
 	direction.second = (isTop)  ? 1 : -1;
 	shift = {-direction.first, direction.second};
-	std::array<std::pair<ptrdiff_t, ptrdiff_t>, 2> zzShifts = {{ {0, direction.second}, {direction.first, 0} }};
+	std::pair<ptrdiff_t, ptrdiff_t> zzShift = {direction.first, 0};
 	index = { isRight * (_nSideSize - 1), !isTop * (_nSideSize - 1) };
 
 	auto toPlainIndex = [_nSideSize](const std::pair<ptrdiff_t, ptrdiff_t>& idx) {return idx.first * _nSideSize + idx.second;};
@@ -195,15 +203,14 @@ void FillZigzag(T* _pnMatrixForFill, size_t _nSideSize, const T* _pnSrcElements,
 		_pnMatrixForFill[toPlainIndex(index)] = _pnSrcElements[k];
 		auto nextIndex = index + shift;
 
-		size_t zzShiftIndex = 0;
-		bool shiftInverseFlag = false;
-		while (!compare<std::greater_equal>(nextIndex ,topLeftBound) || !compare<std::less>(nextIndex, bottomRightBound)) {
-			nextIndex = index + zzShifts.at(zzShiftIndex++);
-			shiftInverseFlag = true;
+		if (!compare<std::greater_equal>(nextIndex ,topLeftBound) || !compare<std::less>(nextIndex, bottomRightBound)) {
+			if (index % (_nSideSize - 1) == topLeftBound)
+				zzShift = swap(zzShift);
+			nextIndex = index + zzShift;
+			shift *= -1;
+			zzShift = swap(zzShift);
 		}
 		index = nextIndex;
-		if (shiftInverseFlag)
-			shift *= -1;
 	}
 }
 
@@ -214,28 +221,17 @@ void desc_element(T (&mat)[N][M], const size_t row, const size_t col, const size
 	cout.flush();
 }
 
-template<typename T>
-void print_as_array(const std::unique_ptr<T[]> &arr, const size_t size) {
-	for (size_t k = 0; k < size; ++k)
-		cout << arr[k] << " ";
-	cout << endl;
-}
 
-template<typename T>
-void print_as_mat(const std::unique_ptr<T[]> &mat, const size_t sideSize) {
-	for (size_t row = 0; row < sideSize; ++row) {
-		for (size_t col = 0; col < sideSize; ++col)
-			cout << mat[row * sideSize + col] << "	";
-		cout << endl;
-	}
-}
 
 
 auto main() -> int {
+
+	namespace u = utility;
+
 	const size_t n = 4;
 	unsigned mat[n][n] = { 0 };
-	fill_ranked(mat);
-	print(mat);
+	u::fill_ranked(mat);
+	u::print(mat);
 
 	auto doSmthg = [&mat](size_t i, size_t j, size_t k)-> void {desc_element(mat, i, j, k);};
 	SnailOrder(n, true, shift::ccw, doSmthg);
@@ -251,10 +247,13 @@ auto main() -> int {
 
 	auto matArray = std::make_unique<unsigned[]>(n * n);
 	auto srcArray = std::make_unique<unsigned[]>(n * n);
-	fill_ranked(srcArray, n * n);
-	print_as_array(srcArray, n * n);
-	FillZigzag(matArray.get(), n, srcArray.get(), corner::left | corner::top);
-	print_as_mat(matArray, n);
+	u::fill_ranked(srcArray, n * n);
+	u::print_as_array(srcArray, n * n);
+	for (size_t c = 0; c <= 3; ++c) {
+		FillZigzag(matArray.get(), n, srcArray.get(), static_cast<corner>(c));
+		u::print_as_mat(matArray, n);
+		cout << endl;
+	}
 
 	return 0;
 }
