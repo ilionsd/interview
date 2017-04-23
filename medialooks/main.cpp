@@ -14,6 +14,7 @@
 #include <memory>
 #include <string>
 #include <sstream>
+#include <type_traits>
 
 
 #include "utility.hpp"
@@ -27,28 +28,26 @@ using std::endl;
 
 
 template<typename T1, typename T2>
-std::string to_string(const std::pair<T1, T2> &p) {
+inline std::string
+to_string(const std::pair<T1, T2> &p) {
 	std::stringstream ss;
 	ss << "{" << p.first << ", " << p.second << "}";
 	return ss.str();
 }
-
 template<typename T1, typename T2>
-std::ostream& operator<< (std::ostream& stream, const std::pair<T1, T2> &p) {
+inline std::ostream&
+operator<< (std::ostream& stream, const std::pair<T1, T2> &p) {
 	stream << to_string(p);
 	return stream;
 }
 
-
-inline
-std::pair<ptrdiff_t, ptrdiff_t>
-operator+ (const std::pair<ptrdiff_t, ptrdiff_t> &x, const std::pair<ptrdiff_t, ptrdiff_t> &y) {
+template<typename T1, typename T2>
+inline std::pair<T1, T2>
+operator+ (const std::pair<T1, T2> &x, const std::pair<T1, T2> &y) {
 	return {x.first + y.first, x.second + y.second};
 }
-
 template<typename T1, typename T2>
-inline
-std::pair<T1, T2>&
+inline std::pair<T1, T2>&
 operator+= (std::pair<T1, T2> &x, const std::pair<T1, T2> &y) {
 	std::get<0>(x) = std::get<0>(x) + std::get<0>(y);
 	std::get<1>(x) = std::get<1>(x) + std::get<1>(y);
@@ -56,19 +55,27 @@ operator+= (std::pair<T1, T2> &x, const std::pair<T1, T2> &y) {
 }
 
 template<typename T1, typename T2, typename T3>
-inline
-std::pair<T1, T2>
+inline std::enable_if_t<std::is_arithmetic<T3>::value, std::pair<T1, T2>>
 operator* (const std::pair<T1, T2> &x, const T3 k) {
 	return {x.first * k, x.second * k};
 }
-
 template<typename T1, typename T2, typename T3>
-inline
-std::pair<T1, T2>&
+inline std::enable_if_t<std::is_arithmetic<T3>::value, std::pair<T1, T2>&>
 operator*= (std::pair<T1, T2> &p, const T3 k) {
-	p.first *= k;
-	p.second *= k;
+	p.first *= k; p.second *= k;
 	return p;
+}
+
+template<typename T1, typename T2>
+inline std::pair<T1, T2>
+operator* (const std::pair<T1, T2>& p1, const std::pair<T1, T2>& p2) {
+	return {p1.first * p2.first, p1.second * p2.second};
+}
+template<typename T1, typename T2>
+inline std::pair<T1, T2>&
+operator*= (const std::pair<T1, T2>& p1, const std::pair<T1, T2>& p2) {
+	p1.first *= p2.first; p1.second *= p2.second;
+	return p1;
 }
 
 template<typename T1, typename T2, typename T3>
@@ -76,12 +83,10 @@ inline std::pair<T1, T2>
 operator% (const std::pair<T1, T2>& p, const T3 modulo) {
 	return {p.first % modulo, p.second % modulo};
 }
-
 template<typename T1, typename T2, typename T3>
 inline std::pair<T1, T2>&
 operator%= (std::pair<T1, T2>& p, const T3 modulo) {
-	p.first %= modulo;
-	p.second %= modulo;
+	p.first %= modulo; p.second %= modulo;
 	return p;
 }
 
@@ -190,11 +195,11 @@ template<typename T>
 void FillZigzag(T* _pnMatrixForFill, size_t _nSideSize, const T* _pnSrcElements, corner _nCorner ) {
 	std::pair<ptrdiff_t, ptrdiff_t> shift, index, direction;
 	bool isRight = static_cast<bool>(_nCorner & corner::right), isTop = static_cast<bool>(_nCorner & corner::top);
-	direction.first = (isRight) ? -1 : 1;
-	direction.second = (isTop)  ? 1 : -1;
+	direction.first = (isTop)  ? 1 : -1;
+	direction.second = (isRight) ? -1 : 1;
 	shift = {-direction.first, direction.second};
-	std::pair<ptrdiff_t, ptrdiff_t> zzShift = {direction.first, 0};
-	index = { isRight * (_nSideSize - 1), !isTop * (_nSideSize - 1) };
+	std::pair<ptrdiff_t, ptrdiff_t> zzShiftMultiplier = {1, 0};
+	index = { !isTop * (_nSideSize - 1), isRight * (_nSideSize - 1) };
 
 	auto toPlainIndex = [_nSideSize](const std::pair<ptrdiff_t, ptrdiff_t>& idx) {return idx.first * _nSideSize + idx.second;};
 
@@ -205,10 +210,10 @@ void FillZigzag(T* _pnMatrixForFill, size_t _nSideSize, const T* _pnSrcElements,
 
 		if (!compare<std::greater_equal>(nextIndex ,topLeftBound) || !compare<std::less>(nextIndex, bottomRightBound)) {
 			if (index % (_nSideSize - 1) == topLeftBound)
-				zzShift = swap(zzShift);
-			nextIndex = index + zzShift;
+				zzShiftMultiplier = swap(zzShiftMultiplier);
+			nextIndex = index + direction * zzShiftMultiplier;
 			shift *= -1;
-			zzShift = swap(zzShift);
+			zzShiftMultiplier = swap(zzShiftMultiplier);
 		}
 		index = nextIndex;
 	}
