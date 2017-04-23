@@ -7,7 +7,6 @@
 
 #include <cstddef>
 #include <iostream>
-#include <vector>
 #include <utility>
 #include <array>
 #include <functional>
@@ -43,15 +42,14 @@ operator<< (std::ostream& stream, const std::pair<T1, T2> &p) {
 
 template<typename T1, typename T2>
 inline std::pair<T1, T2>
-operator+ (const std::pair<T1, T2> &x, const std::pair<T1, T2> &y) {
-	return {x.first + y.first, x.second + y.second};
+operator+ (const std::pair<T1, T2> &p1, const std::pair<T1, T2> &p2) {
+	return {p1.first + p2.first, p1.second + p2.second};
 }
 template<typename T1, typename T2>
 inline std::pair<T1, T2>&
-operator+= (std::pair<T1, T2> &x, const std::pair<T1, T2> &y) {
-	std::get<0>(x) = std::get<0>(x) + std::get<0>(y);
-	std::get<1>(x) = std::get<1>(x) + std::get<1>(y);
-	return x;
+operator+= (std::pair<T1, T2> &p1, const std::pair<T1, T2> &p2) {
+	p1.first += p2.first; p1.second += p2.second;
+	return p1;
 }
 
 template<typename T1, typename T2, typename T3>
@@ -79,12 +77,12 @@ operator*= (const std::pair<T1, T2>& p1, const std::pair<T1, T2>& p2) {
 }
 
 template<typename T1, typename T2, typename T3>
-inline std::pair<T1, T2>
+inline std::enable_if_t<std::is_integral<T3>::value, std::pair<T1, T2>>
 operator% (const std::pair<T1, T2>& p, const T3 modulo) {
 	return {p.first % modulo, p.second % modulo};
 }
 template<typename T1, typename T2, typename T3>
-inline std::pair<T1, T2>&
+inline std::enable_if_t<std::is_integral<T3>::value, std::pair<T1, T2>&>
 operator%= (std::pair<T1, T2>& p, const T3 modulo) {
 	p.first %= modulo; p.second %= modulo;
 	return p;
@@ -145,20 +143,17 @@ void SnailOrder(size_t nSideSize, bool bFromCenter, const shift::type& shifts, c
 		size_t temp = nSideSize / 2;
 		pfOnElement(temp, temp, order++);
 	}
-
 }
 
 std::pair<ptrdiff_t, ptrdiff_t> CalcPos(size_t order, const shift::type& shifts) {
 	size_t k = 0, step = 1;
 	std::pair<ptrdiff_t, ptrdiff_t> pos {0, 0};
-	if (order) {
-		while (order > step) {
-			order -= step;
-			pos += shifts[k++ % shifts.size()] * step;
-			step += k % 2 == 0;
-		}
-		pos += shifts[k++ % 4] * order;
+	while (order > step) {
+		order -= step;
+		pos += shifts[k++ % shifts.size()] * step;
+		step += k % 2 == 0;
 	}
+	pos += shifts[k++ % 4] * order;
 	return pos;
 }
 
@@ -188,9 +183,6 @@ swap(const std::pair<T1, T2>& p) {
 	return {p.second, p.first};
 }
 
-
-
-
 template<typename T>
 void FillZigzag(T* _pnMatrixForFill, size_t _nSideSize, const T* _pnSrcElements, corner _nCorner ) {
 	std::pair<ptrdiff_t, ptrdiff_t> shift, index, direction;
@@ -219,14 +211,36 @@ void FillZigzag(T* _pnMatrixForFill, size_t _nSideSize, const T* _pnSrcElements,
 	}
 }
 
+template<typename T, size_t N>
+void array_rotate(T (&mat)[N][N]) {
+	size_t y, i, j;
+	T z, x = 0;
+	//circuits loop
+	for (size_t k = 1; k <= N / 2; ++k) {
+		//circuit's elements loop
+		for (size_t l = k - 1;l <= N - 1 - k; ++l)
+		{
+			i = l;
+			j = k - 1;
+			//swap loop
+			for (size_t f = 1; f <= 4; ++f) {
+				z = mat[i][j];
+				mat[i][j] = x;
+				x = z;
+				y = i;
+				i = N - 1 - j;
+				j = y;
+			}
+			mat[i][j] = x;
+		}
+	}
+}
 
 template<typename T, size_t N, size_t M>
 void desc_element(T (&mat)[N][M], const size_t row, const size_t col, const size_t order) {
 	cout << mat[row][col] << " ";
 	cout.flush();
 }
-
-
 
 
 auto main() -> int {
@@ -238,13 +252,15 @@ auto main() -> int {
 	u::fill_ranked(mat);
 	u::print(mat);
 
+	cout << "Snail Order" << endl;
 	auto doSmthg = [&mat](size_t i, size_t j, size_t k)-> void {desc_element(mat, i, j, k);};
-	SnailOrder(n, true, shift::ccw, doSmthg);
+	SnailOrder(n, false, shift::ccw, doSmthg);
 	cout << endl;
 	SnailOrder(n, true, shift::cw, doSmthg);
 	cout << endl;
 	const size_t orderMax = n * n - 1;
 	//CalcPos(3, shift::cw);
+	cout << "CalcPos" << endl;
 	for (size_t order = 0; order <= orderMax; ++order ) {
 		cout << CalcPos(order, shift::ccw) << " ";
 	}
@@ -253,10 +269,18 @@ auto main() -> int {
 	auto matArray = std::make_unique<unsigned[]>(n * n);
 	auto srcArray = std::make_unique<unsigned[]>(n * n);
 	u::fill_ranked(srcArray, n * n);
+	cout << "FillZigzag" << endl;
 	u::print_as_array(srcArray, n * n);
 	for (size_t c = 0; c <= 3; ++c) {
 		FillZigzag(matArray.get(), n, srcArray.get(), static_cast<corner>(c));
 		u::print_as_mat(matArray, n);
+		cout << endl;
+	}
+
+	cout << "90 degrees square array rotation (bonus)" << endl;
+	for (size_t rotateNumber = 0; rotateNumber < 4; ++rotateNumber) {
+		array_rotate(mat);
+		u::print(mat);
 		cout << endl;
 	}
 

@@ -4,14 +4,8 @@ itmo/hirlam_sample_input.zip
 
 #Binary files
 ksi/shapes/bin
+medialooks/Debug
 
-#NetBeans project files
-nbproject/private/
-build/
-nbbuild/
-dist/
-nbdist/
-.nb-gradle/
 
 #Eclipse project files
 .metadata
